@@ -37,7 +37,7 @@ jobs:
         
   Deployment:
 
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     needs: build
     steps:
     - uses: actions/download-artifact@v4
@@ -46,3 +46,22 @@ jobs:
         path: .
     - name: Deploy Artifacts
       run: ls -laRt
+    - name: copy file to server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASS }}
+        port: 22
+        source: '*.jar'
+        target: /tmp/
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASS }}
+        port: 22
+        script: |
+           sudo cp /tmp/*.jar /opt/
+           sudo ls -lart /opt
